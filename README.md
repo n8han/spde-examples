@@ -14,8 +14,8 @@ PLEASE improve these sketches and make your own, ideally something that shows of
 
 Also: because Processing OpenGL uses [Jogl][4] with native libraries, it can be tricky to get working across all platforms. Would you mind trying the Matrix example? And, **if it doesn't work** could you inform [me][5] your `os.name` and `os.arch` system properties? You can get these easily inside sbt:
 
-    get os.name
-    get os.arch
+    > get os.name
+    > get os.arch
 
 Thanks!
 
