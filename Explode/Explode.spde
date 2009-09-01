@@ -11,12 +11,14 @@
  
 val cellsize = 2 // Dimensions of each cell in the grid
 
-size(200, 200, P3D)
 colorMode(RGB,255,255,255,100)   // Setting the colormode
 
 val img = loadImage("eames.jpg")       // The source image
-val COLS = width/cellsize
-val ROWS = height / cellsize
+size((img.width*3/2) min 800, (img.height*3/2) min 800, P3D)
+val x0 = (width - img.width) / 2
+val y0 = (height - img.height) / 2
+val COLS = img.width/cellsize
+val ROWS = img.height / cellsize
 
 def draw {
   background(0)
@@ -24,13 +26,13 @@ def draw {
   for ( i <- 0 until COLS; j <- 0 until ROWS) {
     val x = i*cellsize + cellsize/2 // x position
     val y = j*cellsize + cellsize/2 // y position
-    val loc = x + y * width         // Pixel array location
+    val loc = x + y * img.width         // Pixel array location
     val c = img.pixels(loc)       // Grab the color
     // Calculate a z position as a function of mouseX and pixel brightness
-    val z = (mouseX / width.toFloat) * brightness(img.pixels(loc)) - 100.0f
+    val z = (mouseX / width.toFloat) * brightness(img.pixels(loc))// - 50.0f
     // Translate to the location, set fill and stroke, and draw the rect
     pushMatrix()
-    translate(x,y,z)
+    translate(x+x0,y+y0,z)
     fill(c)
     noStroke()
     rectMode(CENTER)
