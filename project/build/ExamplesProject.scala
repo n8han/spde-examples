@@ -12,4 +12,5 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
 
   /* Video projects use GSVideo, which is hard to set up on the Mac. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
+  lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
 }

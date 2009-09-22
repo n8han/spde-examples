@@ -13,13 +13,13 @@ lazy val myMovie = new GSMovie(Loop.this, "station.mov")
 def movieEvent(myMovie: GSMovie): Unit = myMovie.read()
 
 lazy val px = new DrawProxy {
-	size(640, 480, P2D)
-	background(0)
-	// Load and play the video in a loop
-	myMovie.loop()
+  size(640, 480, P2D)
+  background(0)
+  // Load and play the video in a loop
+  myMovie.loop()
 
-	def draw() {
-	  tint(255, 20)
-	  image(myMovie, mouseX-myMovie.width/2, mouseY-myMovie.height/2)
-	}
+  def draw() {
+    tint(255, 20)
+    image(myMovie, mouseX-myMovie.width/2, mouseY-myMovie.height/2)
+  }
 }
