@@ -3,3 +3,4 @@ target/
 project/boot/
 project/plugins/project/
 lib_managed/
+Loop/data
