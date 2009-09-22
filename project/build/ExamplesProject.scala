@@ -7,5 +7,6 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   lazy val flocking = project("Flocking", "Flocking", new SpdeProject(_))  
   lazy val fold = project("Fold", "Fold", new SpdeProject(_))  
   lazy val list = project("List", "List", new SpdeProject(_))
+  lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new SpdeProject(_))
   lazy val matrix = project("Matrix", "Matrix", new SpdeOpenGLProject(_))
 }
