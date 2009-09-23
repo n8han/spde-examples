@@ -4,8 +4,9 @@
 
 size(900,700)
 smooth
-val chs=5 // choose 0 to 5
-var cur=List(spier1,spier2,flake,pentigree,hilbert1,hilbert2)(chs)
+var chs=0 // choose 0 to 5
+val syses=List(spier1,spier2,flake,pentigree,hilbert1,hilbert2)
+var cur=syses(chs)
 
 def spier1 = new L_Sys("F+F+F",PI*2/3,1.0,{
     case 'F'=>"F+F-F-F+F"
@@ -99,4 +100,12 @@ def draw() {
     cur.next
     points=cur.points
   }
+}
+
+// Advance to next system on click
+override def mousePressed() {
+  chs=(chs+1) % syses.length
+  cur=syses(chs)
+  points=cur.points
+  background(255)
 }
