@@ -1,0 +1,102 @@
+// L-System Example for SPDE
+// by Anthony Bagwell
+// http://www.scala-lang.org/node/3391
+
+size(900,700)
+smooth
+val chs=5 // choose 0 to 5
+var cur=List(spier1,spier2,flake,pentigree,hilbert1,hilbert2)(chs)
+
+def spier1 = new L_Sys("F+F+F",PI*2/3,1.0,{
+    case 'F'=>"F+F-F-F+F"
+  })
+
+def spier2 = new L_Sys("X",PI/3,1.0,{
+    case 'X' => "+Y-X-Y+"
+    case 'Y' => "-X+Y+X-"
+  })
+
+def flake = new L_Sys("F++F++F",PI/3,1.0,{
+    case 'F'=>"F-F++F-F"
+  })
+  
+def pentigree = new L_Sys("F-F-F-F-F", PI*2/5,1.0,{
+   case 'F'=>"F-F++F+F-F-F"
+ })
+ 
+def hilbert1 = new L_Sys("xF",PI/2,0.5,{
+    case 'x' => "+yF-xFx-Fy+"
+    case 'y' => "-xF+yFy+Fx-"
+  })
+ 
+def hilbert2 = new L_Sys("XF",PI/2,0.45,{
+    case 'X' => "+YFG-XFX-GFY+"
+    case 'Y' => "-XFG+YFY+GFX-"
+    case 'F' => "HHH"
+    case 'G' => ""
+  })
+ 
+var points=cur.points
+background(255)
+// Initial String, turtle turn angle (rads), sizing ratio, Production Rules 
+class L_Sys(b:String,a:double,r:double ,f:(char)=>String){
+  var s=b
+  var step=1.0
+  var angle=a
+  var start=(.0,0.0,0.0)
+  var ratio=1.0
+// Run couple of trial iterations to calculate step scaling to use
+// so that each iteration just fills window  
+  var d1=br._2-tl._2
+  next
+  next
+  var d2=br._2-tl._2
+  ratio=sqrt(d1/d2)
+  step=height/d1
+  start=((-tl._1*(ratio*ratio)+width-br._1*ratio*ratio)/2,-tl._2*(ratio*ratio),.0)
+  s=b
+  ratio=if(r!=1.0)r else ratio
+  def tl()={
+    points.foldLeft(start){case ((mx,my,ma),(x,y,a))=>(min(mx,x),min(my,y),0)}
+  }
+  def br()={
+    points.foldLeft(start){case ((mx,my,ma),(x,y,a))=>(max(mx,x),max(my,y),0)}
+  }
+ 
+  def next(){
+    s=s.map((c)=>{
+      try {f(c)} catch {
+        case e:Exception => c.toString
+      }
+    }).mkString
+    step=step*ratio
+  }
+  
+// Turtle
+  def points()={
+    s.foldLeft(List(start)){
+      case ((x,y,a)::t , c) => {    
+        c match {
+          case '+' => (x,y,a+angle)::t
+          case '-' => (x,y,a-angle)::t
+          case c if c.isUpperCase  => (x+step*sin(a),y+step*cos(a),a)::(x,y,a)::t
+          case _ => (x,y,a)::t
+        }
+      }
+    }
+  } 
+}
+
+def draw() {
+  if(points.length>1) {
+    var a=points.head
+    points=points.tail
+    var b=points.head
+    line(a._1,a._2,b._1,b._2)
+    }
+  else {
+    background(255)
+    cur.next
+    points=cur.points
+  }
+}
