@@ -10,7 +10,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new SpdeProject(_))
   lazy val matrix = project("Matrix", "Matrix", new SpdeOpenGLProject(_))
 
-  /* Video projects use GSVideo, which is hard to set up on the Mac. */
+  /* Video projects use GSVideo, see VIDEO.md for more info. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
   lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
 }
