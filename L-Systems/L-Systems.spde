@@ -40,7 +40,7 @@ def hilbert2 = new L_Sys("XF",PI/2,0.45,{
 var points=cur.points
 background(255)
 // Initial String, turtle turn angle (rads), sizing ratio, Production Rules 
-class L_Sys(b:String,a:double,r:double ,f:(char)=>String){
+class L_Sys(b:String,a:Double,r:Double ,f:(Char)=>String){
   var s=b
   var step=1.0
   var angle=a
@@ -84,6 +84,7 @@ class L_Sys(b:String,a:double,r:double ,f:(char)=>String){
           case _ => (x,y,a)::t
         }
       }
+      case (l, _) => l
     }
   } 
 }
