@@ -47,7 +47,6 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
     {
       // the template for the proguard configuration file
       val outTemplate = """
-        |-dontoptimize
         |-dontobfuscate
         |-dontnote
         |-dontwarn
@@ -69,7 +68,6 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       
       val defaultJar = (outputPath / defaultJarName).asFile.getAbsolutePath
       log.debug("proguard configuration using main jar " + defaultJar)
-      val runtimeClasspath = runClasspath.get.map(_.asFile).toList
       val externalDependencies = (mainCompileConditional.analysis.allExternals).map(_.getAbsoluteFile).filter(_.getName.endsWith(".jar"))
       log.debug("proguard configuration external dependencies: \n\t" + externalDependencies.mkString("\n\t"))
       // partition jars from the external jar dependencies of this project by whether they are located in the project directory
