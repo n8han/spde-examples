@@ -3,8 +3,8 @@ import spde._
 
 class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
 {
-  lazy val explode = project("Explode", "Explode", new SpdeProject(_) with AppletProject)
-  lazy val flocking = project("Flocking", "Flocking", new SpdeProject(_))  
+  lazy val explode = project("Explode", "Explode", new SpdeProject(_))
+  lazy val flocking = project("Flocking", "Flocking", new SpdeProject(_) with AppletProject)
   lazy val fold = project("Fold", "Fold", new SpdeProject(_))  
   lazy val list = project("List", "List", new SpdeProject(_))
   lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new SpdeProject(_))
@@ -56,6 +56,7 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
         |-outjars %s
         |-ignorewarnings
         |-keep class com.sun.opengl.impl.** { *** *(***); }
+        |-keep class %s
         |-keep class MyRunner { *** main(...); }
         |-keep class processing.core.PApplet { *** main(...); }
         |-keep class spde.core.SApplet { *** scripty(...); }
@@ -84,7 +85,7 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       
       val proguardConfiguration =
         outTemplate.stripMargin.format(libraryJars.mkString(File.pathSeparator),
-          inJars, outputJar.absolutePath)
+          inJars, outputJar.absolutePath, name)
       log.debug("Proguard configuration written to " + proguardConfigurationPath)
       FileUtilities.write(proguardConfigurationPath.asFile, proguardConfiguration, log)
     }
