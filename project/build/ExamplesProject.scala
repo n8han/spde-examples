@@ -20,7 +20,7 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
 {
   import java.io.File
   val proguardConfigurationPath: Path = outputPath / "proguard.pro"
-  lazy val outputJar: Path = rootProject.outputPath / (name + "-applet-" + version + ".jar")
+  lazy val outputJar: Path = outputPath / (name + "-applet-" + version + ".jar")
   def rootProjectDirectory = rootProject.info.projectPath
   
   /****** Dependencies  *******/
@@ -76,12 +76,8 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       // if they are, they are specified with -injars, otherwise they are specified with -libraryjars
       val (externalJars, libraryJars) = externalDependencies.toList.partition(jar => Path.relativize(rootProjectDirectory, jar).isDefined)
       log.debug("proguard configuration library jars locations: " + libraryJars.mkString(", "))
-      // the loader uses JLine, so there is a dependency on the compiler (because JLine is distributed with the compiler,
-      //   it finds the JLine classes from the compiler jar instead of the jline jar on the classpath), but we don't want to
-      //    include the version of JLine from the compiler.
-      val includeExternalJars = externalJars.filter(jar => !isJarX(jar, "scala-compiler"))
       // exclude properties files and manifests from scala-library jar
-      val inJars = (defaultJar :: includeExternalJars.map( _ + "(!META-INF/**,!*.properties)")).map("-injars " + _).mkString("\n")
+      val inJars = (defaultJar :: externalJars.map( _ + "(!META-INF/**,!*.properties)")).map("-injars " + _).mkString("\n")
       
       val proguardConfiguration =
         outTemplate.stripMargin.format(libraryJars.mkString(File.pathSeparator),
@@ -89,15 +85,4 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       log.debug("Proguard configuration written to " + proguardConfigurationPath)
       FileUtilities.write(proguardConfigurationPath.asFile, proguardConfiguration, log)
     }
-  private def withJar(files: List[File], name: String)(f: File => Option[String]): Option[String] =
-    files match
-    {
-      case Nil => Some(name + " not present (try running update)")
-      case jar :: _ => f(jar)
-    }
-  private def isJarX(file: File, x: String) =
-  {
-    val name = file.getName
-    name.startsWith(x) && name.endsWith(".jar")
-  }
 }
