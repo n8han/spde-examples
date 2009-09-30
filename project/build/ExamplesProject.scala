@@ -77,7 +77,7 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       val (externalJars, libraryJars) = externalDependencies.toList.partition(jar => Path.relativize(rootProjectDirectory, jar).isDefined)
       log.debug("proguard configuration library jars locations: " + libraryJars.mkString(", "))
       // exclude properties files and manifests from scala-library jar
-      val inJars = (defaultJar :: externalJars.map( _ + "(!META-INF/**,!*.properties)")).map("-injars " + _).mkString("\n")
+      val inJars = (defaultJar :: externalJars.map( _ + "(!META-INF/**,!*.txt)")).map("-injars " + _).mkString("\n")
       
       val proguardConfiguration =
         outTemplate.stripMargin.format(libraryJars.mkString(File.pathSeparator),
