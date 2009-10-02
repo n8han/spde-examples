@@ -14,7 +14,7 @@ val cellsize = 2 // Dimensions of each cell in the grid
 colorMode(RGB,255,255,255,100)   // Setting the colormode
 
 val img = loadImage("eames.jpg")       // The source image
-size((img.width*3/2) min 800, (img.height*3/2) min 800, P3D)
+size(400, 400, P3D)
 val x0 = (width - img.width) / 2
 val y0 = (height - img.height) / 2
 val COLS = img.width/cellsize

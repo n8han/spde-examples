@@ -3,7 +3,7 @@ import spde._
 
 class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
 {
-  lazy val explode = project("Explode", "Explode", new SpdeProject(_))
+  lazy val explode = project("Explode", "Explode", new SpdeProject(_) with AppletProject)
   lazy val flocking = project("Flocking", "Flocking", new SpdeProject(_) with AppletProject)
   lazy val fold = project("Fold", "Fold", new SpdeProject(_))  
   lazy val list = project("List", "List", new SpdeProject(_))
@@ -16,7 +16,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
 }
 
-trait AppletProject extends BasicScalaProject with BasicPackagePaths
+trait AppletProject extends SpdeProject
 {
   import java.io.File
   val proguardConfigurationPath: Path = outputPath / "proguard.pro"
@@ -42,6 +42,23 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       val exitValue = Process("java", List("-Xmx128M", "-cp", proguardClasspathString, "proguard.ProGuard", "@" + configFile)) ! log
       if(exitValue == 0) None else Some("Proguard failed with nonzero exit code (" + exitValue + ")")
     }
+  def renderInfo = {
+    val sz = """\s*size\s*\(\s*(\d+)\s*,\s*(\d+),?\s*(\S*)\s*\)\s*""".r
+    val sz_line = io.Source.fromFile(sourceGlob.asFile).getLines.find(None != sz.findFirstIn(_))
+    val renderers = Map (
+      "P3D" -> "processing.core.PGraphics3D",
+      "JAVA2D" -> "processing.core.PGraphicsJava2D",
+      "OPENGL"-> "processing.opengl.PGraphicsOpenGL",
+      "PDF"-> "processing.pdf.PGraphicsPDF",
+      "DXF"-> "processing.dxf.RawDXF"
+    ) withDefaultValue ("processing.core.PGraphicsJava2D")
+    
+    sz_line match {
+      case Some(sz(width, height, r)) => (width, height, renderers(r))
+      case Some(sz(width, height)) => (width, height, renderers(""))
+      case _ => (100, 100, renderers(""))
+    }
+  }
   private def writeProguardConfigurationTask =
     task
     {
@@ -60,7 +77,6 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
         |-keep class processing.core.PApplet { *** main(...); }
         |-keep class spde.core.SApplet { *** scripty(...); }
         |-keepclasseswithmembers class * { public void dispose(); }
-        |-keep class processing.core.PGraphicsJava2D { *** <init>(...); }
         |-keep public class org.apache.commons.logging.impl.LogFactoryImpl
         |-keep public class org.apache.commons.logging.impl.Jdk14Logger { *** <init>(...); }
         |-keep public class net.databinder.dispatch.Http* { scala.Function1 ok(); }
@@ -77,9 +93,13 @@ trait AppletProject extends BasicScalaProject with BasicPackagePaths
       // exclude properties files and manifests from scala-library jar
       val inJars = (defaultJar :: externalJars.map( _ + "(!META-INF/**,!*.txt)")).map("-injars " + _).mkString("\n")
       
+      val (width, height, renderer) = renderInfo
+      
       val proguardConfiguration =
         outTemplate.stripMargin.format(libraryJars.mkString(File.pathSeparator),
-          inJars, outputJar.absolutePath, name)
+          inJars, outputJar.absolutePath, name) + (
+            "-keep class %s { *** <init>(...); }\n" format renderer
+          )
       log.debug("Proguard configuration written to " + proguardConfigurationPath)
       FileUtilities.write(proguardConfigurationPath.asFile, proguardConfiguration, log)
     }
