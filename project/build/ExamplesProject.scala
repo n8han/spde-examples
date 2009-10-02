@@ -5,11 +5,11 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
 {
   lazy val explode = project("Explode", "Explode", new SpdeProject(_) with AppletProject)
   lazy val flocking = project("Flocking", "Flocking", new SpdeProject(_) with AppletProject)
-  lazy val fold = project("Fold", "Fold", new SpdeProject(_))  
-  lazy val list = project("List", "List", new SpdeProject(_))
-  lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new SpdeProject(_))
-  lazy val lsystems = project("L-Systems", "L_Systems", new SpdeProject(_))
-  lazy val matrix = project("Matrix", "Matrix", new SpdeOpenGLProject(_))
+  lazy val fold = project("Fold", "Fold", new SpdeProject(_) with AppletProject)
+  lazy val list = project("List", "List", new SpdeProject(_) with AppletProject)
+  lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new SpdeProject(_) with AppletProject)
+  lazy val lsystems = project("L-Systems", "L_Systems", new SpdeProject(_) with AppletProject)
+  lazy val matrix = project("Matrix", "Matrix", new SpdeOpenGLProject(_) with AppletProject)
 
   /* Video projects use GSVideo, see VIDEO.md for more info. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
@@ -41,7 +41,7 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
   lazy val writeProguardConfiguration = writeProguardConfigurationTask dependsOn `package`
   lazy val pack = packTask dependsOn(proguard)
   lazy val writeHtml = writeHtmlTask dependsOn(glob)
-  lazy val applet = task { None } dependsOn (pack, writeHtml)
+  lazy val applet = appletTask dependsOn (pack, writeHtml)
   
   private def proguardTask = fileTask(outputJar from sourceGlob)
     {
@@ -129,4 +129,16 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
       )
     }
     def writeHtmlTask = templateTask(AppletTemplate.resource, outputHtml)
+    
+    def appletTask = task {
+      try {
+        val dsk = Class.forName("java.awt.Desktop")
+        dsk.getMethod("browse", classOf[java.net.URI]).invoke(
+          dsk.getMethod("getDesktop").invoke(null), outputHtml.asFile.toURI
+        )
+        None
+      } catch {
+        case _ => Some("Unable to open browser. Java 5 VM?")
+      }
+    }
 }
