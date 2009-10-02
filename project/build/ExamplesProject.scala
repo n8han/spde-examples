@@ -16,7 +16,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
 }
 
-trait AppletProject extends SpdeProject
+trait AppletProject extends SpdeProject with archetect.TemplateTasks
 {
   import java.io.File
   val proguardConfigurationPath: Path = outputPath / "proguard.pro"
@@ -45,18 +45,19 @@ trait AppletProject extends SpdeProject
   def renderInfo = {
     val sz = """\s*size\s*\(\s*(\d+)\s*,\s*(\d+),?\s*(\S*)\s*\)\s*""".r
     val sz_line = io.Source.fromFile(sourceGlob.asFile).getLines.find(None != sz.findFirstIn(_))
-    val renderers = Map (
+    val rendererMap = Map (
       "P3D" -> "processing.core.PGraphics3D",
       "JAVA2D" -> "processing.core.PGraphicsJava2D",
       "OPENGL"-> "processing.opengl.PGraphicsOpenGL",
       "PDF"-> "processing.pdf.PGraphicsPDF",
       "DXF"-> "processing.dxf.RawDXF"
-    ) withDefaultValue ("processing.core.PGraphicsJava2D")
+    )
+    val univRenderers = "processing.core.PGraphicsJava2D" :: Nil
     
     sz_line match {
-      case Some(sz(width, height, r)) => (width, height, renderers(r))
-      case Some(sz(width, height)) => (width, height, renderers(""))
-      case _ => (100, 100, renderers(""))
+      case Some(sz(width, height, r)) => (width, height, rendererMap(r) :: univRenderers)
+      case Some(sz(width, height)) => (width, height, univRenderers)
+      case _ => (100, 100, univRenderers)
     }
   }
   private def writeProguardConfigurationTask =
@@ -93,14 +94,23 @@ trait AppletProject extends SpdeProject
       // exclude properties files and manifests from scala-library jar
       val inJars = (defaultJar :: externalJars.map( _ + "(!META-INF/**,!*.txt)")).map("-injars " + _).mkString("\n")
       
-      val (width, height, renderer) = renderInfo
+      val (width, height, renderers) = renderInfo
       
       val proguardConfiguration =
         outTemplate.stripMargin.format(libraryJars.mkString(File.pathSeparator),
-          inJars, outputJar.absolutePath, name) + (
+          inJars, outputJar.absolutePath, name) + renderers.map { renderer =>
             "-keep class %s { *** <init>(...); }\n" format renderer
-          )
+          }.mkString
       log.debug("Proguard configuration written to " + proguardConfigurationPath)
       FileUtilities.write(proguardConfigurationPath.asFile, proguardConfiguration, log)
     }
+    def templateMappings = renderInfo match {
+      case (width, height, _)  => Map(
+        "width" -> width, 
+        "height" -> height,
+        "sketch" -> name,
+        "archive" -> outputJar.asFile.getName
+      )
+    }
+    val writeHtmlTask = templateTask(AppletTemplate.resource, outputPath / "applet.html")
 }
