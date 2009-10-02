@@ -20,13 +20,17 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
 {
   // this project's Proguard invocation tasks are derived from sbt.LoaderProject
   import java.io.File
+  val appletOutput = outputPath / "applet"
   val proguardConfigurationPath: Path = outputPath / "proguard.pro"
-  def outputExt(ext: String) = outputPath / (name + "-applet-" + version + "." + ext)
-  lazy val outputJar = outputExt("jar")
-  lazy val outputJp = outputExt("jp")
-  lazy val outputJpgz = outputExt("jpgz")
-  def rootProjectDirectory = rootProject.info.projectPath
+  def outputExt(ext: String) = name + "-applet-" + version + "." + ext
+
+  lazy val outputJar = appletOutput / outputExt("jar")
+  lazy val outputJp = outputPath / outputExt("jp")
+  lazy val outputJpgz = appletOutput / outputExt("jpgz")
+  lazy val outputHtml = appletOutput / (name + ".html")
   
+  def rootProjectDirectory = rootProject.info.projectPath
+
   /****** Dependencies  *******/
   val defaultConfig = config("default")
   val toolsConfig = config("tools")
@@ -37,9 +41,9 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
   lazy val writeProguardConfiguration = writeProguardConfigurationTask dependsOn `package`
   lazy val pack = packTask dependsOn(proguard)
   lazy val writeHtml = writeHtmlTask dependsOn(glob)
+  lazy val applet = task { None } dependsOn (pack, writeHtml)
   
-  private def proguardTask =
-    task
+  private def proguardTask = fileTask(outputJar from sourceGlob)
     {
       FileUtilities.clean(outputJar :: Nil, log)
       val proguardClasspath = managedClasspath(toolsConfig)
@@ -68,8 +72,8 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
       case _ => (100, 100, univRenderers)
     }
   }
-  private def writeProguardConfigurationTask =
-    task
+  private def writeProguardConfigurationTask = 
+    fileTask(proguardConfigurationPath from sourceGlob)
     {
       // the template for the proguard configuration file
       val outTemplate = """
@@ -124,5 +128,5 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
         "archive" -> outputJar.asFile.getName
       )
     }
-    def writeHtmlTask = templateTask(AppletTemplate.resource, outputPath / "applet.html")
+    def writeHtmlTask = templateTask(AppletTemplate.resource, outputHtml)
 }
