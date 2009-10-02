@@ -18,9 +18,13 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
 
 trait AppletProject extends SpdeProject with archetect.TemplateTasks
 {
+  // this project's Proguard invocation tasks are derived from sbt.LoaderProject
   import java.io.File
   val proguardConfigurationPath: Path = outputPath / "proguard.pro"
-  lazy val outputJar: Path = outputPath / (name + "-applet-" + version + ".jar")
+  def outputExt(ext: String) = outputPath / (name + "-applet-" + version + "." + ext)
+  lazy val outputJar = outputExt("jar")
+  lazy val outputJp = outputExt("jp")
+  lazy val outputJpgz = outputExt("jpgz")
   def rootProjectDirectory = rootProject.info.projectPath
   
   /****** Dependencies  *******/
@@ -29,8 +33,10 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
   val proguardJar = "net.sf.proguard" % "proguard" % "4.3" % "tools->default"
   
   /******** Proguard *******/
-  lazy val proguard = proguardTask dependsOn(`package`, writeProguardConfiguration)
+  lazy val proguard = proguardTask dependsOn(`package`, glob, writeProguardConfiguration)
   lazy val writeProguardConfiguration = writeProguardConfigurationTask dependsOn `package`
+  lazy val pack = packTask dependsOn(proguard)
+  lazy val writeHtml = writeHtmlTask dependsOn(glob)
   
   private def proguardTask =
     task
@@ -42,7 +48,8 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
       val exitValue = Process("java", List("-Xmx128M", "-cp", proguardClasspathString, "proguard.ProGuard", "@" + configFile)) ! log
       if(exitValue == 0) None else Some("Proguard failed with nonzero exit code (" + exitValue + ")")
     }
-  def renderInfo = {
+  private def renderInfo = {
+    // tasks that call here should depend on glob
     val sz = """\s*size\s*\(\s*(\d+)\s*,\s*(\d+),?\s*(\S*)\s*\)\s*""".r
     val sz_line = io.Source.fromFile(sourceGlob.asFile).getLines.find(None != sz.findFirstIn(_))
     val rendererMap = Map (
@@ -55,6 +62,7 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
     val univRenderers = "processing.core.PGraphicsJava2D" :: Nil
     
     sz_line match {
+      case Some(sz(width, height, "")) => (width, height, univRenderers)
       case Some(sz(width, height, r)) => (width, height, rendererMap(r) :: univRenderers)
       case Some(sz(width, height)) => (width, height, univRenderers)
       case _ => (100, 100, univRenderers)
@@ -104,6 +112,10 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
       log.debug("Proguard configuration written to " + proguardConfigurationPath)
       FileUtilities.write(proguardConfigurationPath.asFile, proguardConfiguration, log)
     }
+    def packTask = fileTask(outputJpgz from outputJar) {
+      Pack.pack(outputJar, outputJp, log) orElse
+        FileUtilities.gzip(outputJp, outputJpgz, log)
+    }
     def templateMappings = renderInfo match {
       case (width, height, _)  => Map(
         "width" -> width, 
@@ -112,5 +124,5 @@ trait AppletProject extends SpdeProject with archetect.TemplateTasks
         "archive" -> outputJar.asFile.getName
       )
     }
-    val writeHtmlTask = templateTask(AppletTemplate.resource, outputPath / "applet.html")
+    def writeHtmlTask = templateTask(AppletTemplate.resource, outputPath / "applet.html")
 }
