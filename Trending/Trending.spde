@@ -1,0 +1,38 @@
+import dispatch._
+import dispatch.liftjson.Js._
+import net.liftweb.json.JsonAST._
+import actors.Futures._
+
+size(400, 400)
+
+val trending = :/("search.twitter.com") / "trends" / "current.json"
+val http = new Http
+val trends = http(trending ># { js =>
+  for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")
+})
+def photoFeed(tag: String) = :/("api.flickr.com") / "services" / "feeds" / "photos_public.gne" <<? Map(
+  "format" -> "json", "tags" -> tag, "nojsoncallback" -> 1
+)
+val rows = trends.map { t => future {
+  (new Http)( photoFeed(t) ># { js =>
+    for (JString(url) <- js \\ "m") yield { fut(url) }
+  } )
+} }
+
+def fut(url:String) = future {
+  loadImage(url)  
+}
+
+def avail[T](f: Iterable[actors.Future[T]]) = (f filter { _.isSet } map { _() }).toList
+
+def draw() {
+  val availRows = avail(rows)
+  val photoHeight = availRows.length / height
+  for ((relatedPhotos, x) <- availRows.zipWithIndex) {
+    val availPhotos = avail(relatedPhotos)
+    val photoWidth = availPhotos.length / width
+    for ((photo, y) <- availPhotos.zipWithIndex) {
+      image(photo, x*photoWidth, y*photoHeight, photoWidth, photoHeight)
+    }
+  }
+}

@@ -14,4 +14,9 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   /* Video projects use GSVideo, see VIDEO.md for more info. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
   lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
+
+
+  lazy val trending = project("Trending", "Trending", new DefaultSpdeProject(_) {
+    val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.6.0"
+  })
 }
