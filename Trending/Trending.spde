@@ -26,8 +26,10 @@ val rows = trends.map { t => future {
   } )
 } }
 
+def available[T](fs: Iterable[Future[T]]) = fs filter { _.isDone } map { _.get } toList
+
 def draw() {
-  val availRows = rows filter { _.isDone } map { _.get filter { _.isDone } map { _.get } } filter { !_.isEmpty }
+  val availRows = available(rows) map { available(_) } filter { !_.isEmpty }
   if (!availRows.isEmpty) {
     val photoHeight = height / availRows.length
     for ((availPhotos, y) <- availRows.zipWithIndex) {
