@@ -2,10 +2,12 @@ import dispatch._
 import dispatch.liftjson.Js._
 import net.liftweb.json.JsonAST._
 
-size(400, 400)
+size(800, 800)
+frameRate(5)
+smooth()
 
 import java.util.concurrent.{Future,ThreadPoolExecutor,LinkedBlockingQueue,TimeUnit,Callable}
-val executor = new ThreadPoolExecutor(8, 64, 1, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable])
+lazy val executor = new ThreadPoolExecutor(8, 64, 1, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable])
 def future[T](f: => T):Future[T] = {
   executor.submit(new Callable[T]{
     def call = f
@@ -31,11 +33,17 @@ def available[T](fs: Iterable[Future[T]]) = fs filter { _.isDone } map { _.get }
 def draw() {
   val availRows = available(rows) map { available(_) } filter { !_.isEmpty }
   if (!availRows.isEmpty) {
-    val photoHeight = height / availRows.length
-    for ((availPhotos, y) <- availRows.zipWithIndex) {
-      val photoWidth = width / availPhotos.length
-      for ((photo, x) <- availPhotos.zipWithIndex) {
-        image(photo, x*photoWidth, y*photoHeight, photoWidth, photoHeight)
+    if (isMousePressed) {
+      val row = availRows(mouseY * availRows.length / height)
+      val photo = row(mouseX * row.length / height)
+      image(photo, 0, 0, width, height)
+    } else {
+      val photoHeight = height / availRows.length
+      for ((availPhotos, y) <- availRows.zipWithIndex) {
+        val photoWidth = width / availPhotos.length
+        for ((photo, x) <- availPhotos.zipWithIndex) {
+          image(photo, x*photoWidth, y*photoHeight, photoWidth, photoHeight)
+        }
       }
     }
   }
