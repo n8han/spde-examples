@@ -1,38 +1,40 @@
 import dispatch._
 import dispatch.liftjson.Js._
 import net.liftweb.json.JsonAST._
-import actors.Futures._
 
 size(400, 400)
+
+import java.util.concurrent.{Future,ThreadPoolExecutor,LinkedBlockingQueue,TimeUnit,Callable}
+val executor = new ThreadPoolExecutor(8, 64, 1, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable])
+def future[T](f: => T):Future[T] = {
+  executor.submit(new Callable[T]{
+    def call = f
+  })
+}
 
 val trending = :/("search.twitter.com") / "trends" / "current.json"
 val http = new Http
 val trends = http(trending ># { js =>
-  for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")
+  (for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")) take 10
 })
 def photoFeed(tag: String) = :/("api.flickr.com") / "services" / "feeds" / "photos_public.gne" <<? Map(
   "format" -> "json", "tags" -> tag, "nojsoncallback" -> 1
 )
 val rows = trends.map { t => future {
   (new Http)( photoFeed(t) ># { js =>
-    for (JString(url) <- js \\ "m") yield { fut(url) }
+    (for (JString(url) <- js \\ "m") yield url) take 10 map { url => future { loadImage(url) } }
   } )
 } }
 
-def fut(url:String) = future {
-  loadImage(url)  
-}
-
-def avail[T](f: Iterable[actors.Future[T]]) = (f filter { _.isSet } map { _() }).toList
-
 def draw() {
-  val availRows = avail(rows)
-  val photoHeight = availRows.length / height
-  for ((relatedPhotos, x) <- availRows.zipWithIndex) {
-    val availPhotos = avail(relatedPhotos)
-    val photoWidth = availPhotos.length / width
-    for ((photo, y) <- availPhotos.zipWithIndex) {
-      image(photo, x*photoWidth, y*photoHeight, photoWidth, photoHeight)
+  val availRows = rows filter { _.isDone } map { _.get filter { _.isDone } map { _.get } } filter { !_.isEmpty }
+  if (!availRows.isEmpty) {
+    val photoHeight = height / availRows.length
+    for ((availPhotos, y) <- availRows.zipWithIndex) {
+      val photoWidth = width / availPhotos.length
+      for ((photo, x) <- availPhotos.zipWithIndex) {
+        image(photo, x*photoWidth, y*photoHeight, photoWidth, photoHeight)
+      }
     }
   }
 }
