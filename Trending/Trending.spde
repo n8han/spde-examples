@@ -6,18 +6,11 @@ size(800, 800)
 frameRate(5)
 smooth()
 
-import java.util.concurrent.{Future,ThreadPoolExecutor,LinkedBlockingQueue,TimeUnit,Callable}
-lazy val executor = new ThreadPoolExecutor(8, 64, 1, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable])
-def future[T](f: => T):Future[T] = {
-  executor.submit(new Callable[T]{
-    def call = f
-  })
-}
 
 val trending = :/("search.twitter.com") / "trends" / "current.json"
 val http = new Http
 val trends = http(trending ># { js =>
-  (for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")) take 10
+  (for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")) take 12
 })
 def photoFeed(tag: String) = :/("api.flickr.com") / "services" / "feeds" / "photos_public.gne" <<? Map(
   "format" -> "json", "tags" -> tag, "nojsoncallback" -> 1
@@ -27,8 +20,6 @@ val rows = trends.map { t => future {
     (for (JString(url) <- js \\ "m") yield url) take 10 map { url => future { loadImage(url) } }
   } )
 } }
-
-def available[T](fs: Iterable[Future[T]]) = fs filter { _.isDone } map { _.get } toList
 
 def draw() {
   val availRows = available(rows) map { available(_) } filter { !_.isEmpty }
