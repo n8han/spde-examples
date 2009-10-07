@@ -5,7 +5,7 @@
 val d= 200
 size(400, 400)
 background(0, 10, 20)
-var a=List(List(d/2,0,255,0,0),List(d,d,0,255,0),List(0,d,0,0,255))
+val a=List(List(d/2,0,255,0,0),List(d,d,0,255,0),List(0,d,0,0,255))
 var p=List(d,0,255,0,0)
 def draw() {
   for(i<-1 to 10) {
