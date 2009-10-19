@@ -8,21 +8,19 @@
  * Translated to Scala.
  */
 
-import codeanticode.gsvideo._
+size(640, 480, P2D)
+background(0)
 
-lazy val myMovie = new GSMovie(this, "station.mov")
+// Load and play the video in a loop
+lazy val myMovie = new GSMovie(applet, "station.mov")
 def movieEvent(m: GSMovie): Unit = m.read()
 
-lazy val px = new DrawProxy {
-  size(640, 480, P2D)
-  background(0)
-  // Load and play the video in a loop
-  myMovie.play()
+myMovie.play()
 
-  def draw() {
-    if (myMovie.width > 1 && myMovie.height > 1) {
-     myMovie.jump(myMovie.duration * mouseX / width)
-     image(myMovie, 0, 0, width, height)
-    }
+def draw() {
+  if (myMovie.width > 1 && myMovie.height > 1) {
+   myMovie.jump(myMovie.duration * mouseX / width)
+   image(myMovie, 0, 0, width, height)
   }
 }
+
