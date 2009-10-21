@@ -3,7 +3,7 @@ Video Projects
 
 The original [Processing Video library][1] uses Quicktime for Java, which isn't compatible with 64-bit JVMs and [may never be][2]. To gain 64-bit compatibility, Linux compatibility, and to avoid the possibility of future vendor abandonment, Spde defaults to the [GSVideo][3] library for Processing. GSVideo renders video with the open-source [GStreamer][4] library.
 
-Most Linux installations have GStreamer already installed; Mac OS X users can install it through [MacPorts][5]. To play videos you'll need not only GStreamer, but codecs. This command will compile and install everything you need (it may take a while):
+Most Linux installations have GStreamer already installed but they may need to install a GStreamer ffmpeg plugin. Mac OS X users can install these through [MacPorts][5]. This command will compile and install everything you need (it may take a while):
 
     sudo port install gst-ffmpeg
 
