@@ -8,8 +8,8 @@ smooth()
 
 
 val trending = :/("search.twitter.com") / "trends" / "current.json"
-val http = new Http
-val trends = http(trending ># { js =>
+
+val trends = (new Http)(trending ># { js =>
   (for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")) take 12
 })
 def photoFeed(tag: String) = :/("api.flickr.com") / "services" / "feeds" / "photos_public.gne" <<? Map(
