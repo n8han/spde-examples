@@ -1,5 +1,6 @@
 import sbt._
 
 class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
-	val spde_sbt = "net.databinder.spde" % "spde-sbt-plugin" % "0.2.0"
+  val databinder_repo = "Databinder Repository" at "http://databinder.net/repo"
+	val spde_sbt = "us.technically.spde" % "spde-sbt-plugin" % "0.2.0"
 }
