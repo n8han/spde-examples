@@ -28,7 +28,7 @@ override def mousePressed() {
 
 class Flock {
   // Add an initial set of boids into the system
-  private var boids = List.tabulate(50, n => new Boid(Vector(width/2,height/2), 2.0, 0.05))
+  private var boids = (0 to 50) map { n => new Boid(Vector(width/2,height/2), 2.0, 0.05) } toList
 
   def run() {
     boids foreach { _ run boids }
