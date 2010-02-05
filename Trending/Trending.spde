@@ -6,20 +6,20 @@ size(800, 800)
 frameRate(5)
 smooth()
 
-
+val h = new Http with Threads
 val trending = :/("search.twitter.com") / "trends" / "current.json"
 
-val trends = (new Http)(trending ># { js =>
+val trends = h(trending ># { js =>
   (for (JString(query) <- js \\ "query") yield query.replaceAll("[#\"]", "")) take 12
 })
 def photoFeed(tag: String) = :/("api.flickr.com") / "services" / "feeds" / "photos_public.gne" <<? Map(
   "format" -> "json", "tags" -> tag, "nojsoncallback" -> 1
 )
-val rows = trends.map { t => future {
-  (new Http)( photoFeed(t) ># { js =>
+val rows = trends.map { t =>
+  h.future( photoFeed(t) ># { js =>
     (for (JString(url) <- js \\ "m") yield url) take 10 map { url => future { loadImage(url) } }
   } )
-} }
+}
 
 def draw() {
   val availRows = available(rows) map { available(_) } filter { !_.isEmpty }
