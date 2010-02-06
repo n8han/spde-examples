@@ -7,7 +7,6 @@ frameRate(5)
 smooth()
 
 val h = new Http with Threads
-import DefaultJucFuture.future
 val trending = :/("search.twitter.com") / "trends" / "current.json"
 
 val trends = h(trending ># { js =>
