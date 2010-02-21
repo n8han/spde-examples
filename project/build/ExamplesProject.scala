@@ -19,6 +19,12 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
   lazy val trending = project("Trending", "Trending", new DefaultSpdeProject(_) {
     val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.0"
   })
-  lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_))
-  lazy val straight_java = project("Straight_Java", "Straight_Java", new DefaultSpdeProject(_))
+  lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
+    override def appletClass = "StraightScala"
+  })
+  lazy val straight_java = project("Straight_Java", "Straight_Java", new DefaultSpdeProject(_) {
+    override def appletClass = "StraightJava"
+    override def proguardOptions = 
+      "-libraryjars \"/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar\"" :: super.proguardOptions
+  })
 }
