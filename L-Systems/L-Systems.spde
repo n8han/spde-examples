@@ -73,7 +73,7 @@ class L_Sys(b:String,var angle:Double,r:Double ,f: PartialFunction[Char, String]
         c match {
           case '+' => (x,y,a+angle)::t
           case '-' => (x,y,a-angle)::t
-          case c if c.isUpperCase  => (x+step*sin(a),y+step*cos(a),a)::(x,y,a)::t
+          case c if c.isUpper  => (x+step*sin(a),y+step*cos(a),a)::(x,y,a)::t
           case _ => (x,y,a)::t
         }
       }
