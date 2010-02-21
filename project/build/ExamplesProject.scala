@@ -1,7 +1,7 @@
 import sbt._
 import spde._
 
-class ExamplesProject(info: ProjectInfo) extends ParentProject(info)
+class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with posterous.Publish
 {
   lazy val explode = project("Explode", "Explode", new DefaultSpdeProject(_))
   lazy val flocking = project("Flocking", "Flocking", new DefaultSpdeProject(_))
