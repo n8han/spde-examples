@@ -1,0 +1,12 @@
+import scala.util.continuations._
+
+size(600, 400)
+
+val n = reset { shift { k: (Int => Int) =>
+  k(2)
+} + 1 }
+
+
+def draw() {
+  text(n.toString, 50, 50)
+}
