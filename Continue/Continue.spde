@@ -1,6 +1,6 @@
 import scala.util.continuations._
 
-size(600, 400)
+size(500, 200)
 frameRate(15)
 
 var cur: Unit => Unit = { (u: Unit) =>
