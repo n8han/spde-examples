@@ -3,10 +3,6 @@ import scala.util.continuations._
 size(600, 400)
 frameRate(15)
 
-case class Point(x: Int, y: Int) {
-  def + (p:Point) = Point(x + p.x, y + p.y)
-}
-
 var cur: Unit => Unit = { (u: Unit) =>
   reset {
     var x = 0
