@@ -1,12 +1,31 @@
 import scala.util.continuations._
 
 size(600, 400)
+frameRate(15)
 
-val n = reset { shift { k: (Int => Int) =>
-  k(2)
-} + 1 }
+def go(p: Point) = shift { k: (Point => Point) =>
+  k(p)
+}
+def up = go(Point(0, -1))
+def down = go(Point(0, 1))
+def left = go(Point(-1, 0))
+def right = go(Point(1, 0))
+def pass = go(Point(0, 0))
 
+var position = Point(width/2, height/2)
+
+case class Point(x: Int, y: Int) {
+  def + (p:Point) = Point(x + p.x, y + p.y)
+}
 
 def draw() {
-  text(n.toString, 50, 50)
+  position = reset { 
+    (keyCode match {
+      case DOWN => down
+      case RIGHT => right
+      case _ => pass
+    } ) + go(position)
+  }
+  color(0)
+  point(position.x, position.y)
 }
