@@ -19,7 +19,6 @@ var cur: Unit => Unit = { (u: Unit) =>
         cur = k
       }
     }
-    ()
   }
 }
 
