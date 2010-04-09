@@ -22,8 +22,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightScala"
   })
-  lazy val android = project("Android", "Android", new AndroidProject(_) with SpdeProject {
-    val core_android = "org.processing" % "core-android" % "0183" from "http://dev.processing.org/source/index.cgi/*checkout*/tags/processing-0183/android/core.zip?rev=6573"
+  lazy val android = project("Android", "Android", new AndroidProject(_) with SpdeAndroidProject {
     def androidPlatformName="android-2.0"
     override def sketchClass = "StraightScala"
   })
