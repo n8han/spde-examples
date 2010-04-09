@@ -24,7 +24,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   })
   lazy val android = project("Android", "Android", new AndroidProject(_) with SpdeAndroidProject {
     def androidPlatformName="android-2.0"
-    override def sketchClass = "StraightScala"
+    override def sketchClass = "Fold"
   })
   lazy val straight_java = project("Straight_Java", "Straight_Java", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightJava"

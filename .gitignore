@@ -5,4 +5,4 @@ project/plugins/project/
 lib_managed/
 Loop/data
 Scratch/data
-Android/src/main/java/us/technically/spde/example/R.java
+Android/src/main/java/spde/example/R.java
