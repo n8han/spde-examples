@@ -1,0 +1,26 @@
+def plot(minX: Int, maxX: Int) = {
+  val rangeX = maxX - minX
+  lazy val inputs = (0 to width) map { px =>
+    (px, minX + (px.toFloat / width * rangeX).toInt) 
+  }
+  { f: (Int => Int) =>
+    val values = inputs map { case (px, x) => (px, x, f(x)) }
+    val (headPX, headX, headY) = values.head
+    val (minY, maxY) = ((headX, headY) /: values.tail) { 
+      case ((max, min), (px, x, y)) =>
+        (if (y > max) y else max, if (y < min) y else min)
+    }
+    val rangeY = maxY - minY
+    val points = values map { case (px, x, y) =>
+      (px, ((y - minY).toFloat / rangeY * height).toInt)
+    }
+    for ( (x, y) <- points ) point(x, y)
+  }
+}
+val centplot = plot(-100, 100)
+
+size(500, 500)
+
+def draw {
+  centplot { x => x }
+}
