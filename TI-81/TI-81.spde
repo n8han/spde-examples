@@ -1,26 +1,12 @@
-def plot(minX: Float, maxX: Float) = {
-  val rangeX = maxX - minX
-  lazy val inputs = (0 to width) map { px =>
-    (px, minX + rangeX * px / width)
-  }
-  { f: (Float => Float) =>
-    val values = inputs map { case (px, x) => (px, x, f(x)) }
-    val (headPX, headX, headY) = values.head
-    val (minY, maxY) = ((headX, headY) /: values.tail) { 
-      case ((max, min), (px, x, y)) =>
-        (if (y > max) y else max, if (y < min) y else min)
-    }
-    val rangeY = maxY - minY
-    val points = values map { case (px, x, y) =>
-      (px, ((y - minY) / rangeY * height).toInt)
-    }
-    for ( (x, y) <- points ) point(x, y)
-  }
-}
-
 size(500, 500)
 
-val centplot = plot(0, 6*PI)
 def draw {
-  centplot { x => sin(x) }
+  background(128)
+  lineplot(
+    points(0, 10) { 
+      x => sin( x * mouseX * 5 / width ) 
+    } map { 
+      case (x, y) => (x, height/2 - (y * mouseY * 250 / height).toInt)
+    }
+  )
 }
