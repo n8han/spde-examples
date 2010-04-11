@@ -1,0 +1,155 @@
+/**
+ * Geometry 
+ * by Marius Watz. 
+ *
+ * Translated until Scala by Nathan Hamblen.
+ * 
+ * Using sin/cos lookup tables, blends colors, and draws a series of 
+ * rotating arcs on the screen.
+*/
+ 
+val SINCOS_PRECISION=1.0
+val SINCOS_LENGTH= (360.0/SINCOS_PRECISION).toInt
+
+// Trig lookup tables borrowed from Toxi cryptic but effective.
+val sinLUT = (0 until SINCOS_LENGTH) map { i =>
+  sin(i*DEG_TO_RAD*SINCOS_PRECISION)
+} toArray
+val cosLUT = (0 until SINCOS_LENGTH) map { i =>
+  cos(i*DEG_TO_RAD*SINCOS_PRECISION)
+} toArray
+ 
+// System data
+val num = 150
+val pt = new Array[Float](6*num) // rotx, roty, deg, rad, w, speed
+val style = new Array[Int](2*num) // color, render style
+
+ 
+override def setup() {
+  size(1024, 768, OPENGL)
+  background(255)
+}
+
+// Set up arc shapes
+var index=0 
+def index_++ = {
+  index += 1
+  index - 1
+}
+var prob = 0.0
+for (i <- 0 until num) {
+  pt(index_++) = random(PI*2) // Random X axis rotation
+  pt(index_++) = random(PI*2) // Random Y axis rotation
+
+  pt(index_++) = random(60,80) // Short until quarter-circle arcs
+  if(random(100)>90) pt(index)=(random(8,27)*10).toInt
+
+  pt(index_++) = (random(2,50)*5).toInt // Radius. Space them out nicely
+
+  pt(index_++) = random(4,32) // Width of band
+  if(random(100)>90) pt(index)=random(40,60) // Width of band
+
+  pt(index_++) = radians(random(5,30))/5 // Speed of rotation
+
+  // get colors
+  prob = random(100)
+  if(prob<30) style(i*2)=colorBlended(random(1), 255,0,100, 255,0,0, 210)
+  else if(prob<70) style(i*2)=colorBlended(random(1), 0,153,255, 170,225,255, 210)
+  else if(prob<90) style(i*2)=colorBlended(random(1), 200,255,0, 150,255,0, 210)
+  else style(i*2)=color(255,255,255, 220)
+
+  if(prob<50) style(i*2)=colorBlended(random(1), 200,255,0, 50,120,0, 210)
+  else if(prob<90) style(i*2)=colorBlended(random(1), 255,100,0, 255,255,0, 210)
+  else style(i*2)=color(255,255,255, 220)
+
+  style(i*2+1)=((random(100))%3).toInt
+}
+ 
+def draw() {
+ 
+  background(0)
+ 
+  index=0
+  translate(width/2, height/2, 0)
+  rotateX(PI/6)
+  rotateY(PI/6)
+ 
+  for (i <- 0 until num) {
+    pushMatrix()
+ 
+    rotateX(pt(index_++))
+    rotateY(pt(index_++))
+ 
+    if(style(i*2+1)==0) {
+      stroke(style(i*2))
+      noFill()
+      strokeWeight(1)
+      arcLine(0,0, pt(index_++),pt(index_++),pt(index_++))
+    }
+    else if(style(i*2+1)==1) {
+      fill(style(i*2))
+      noStroke()
+      arcLineBars(0,0, pt(index_++),pt(index_++),pt(index_++))
+    }
+    else {
+      fill(style(i*2))
+      noStroke()
+      arc(0,0, pt(index_++),pt(index_++),pt(index_++))
+    }
+ 
+    // increase rotation
+    pt(index-5)+=pt(index)/10
+    pt(index-4)+=pt(index_++)/20
+ 
+    popMatrix()
+  }
+}
+ 
+ 
+// Get blend of two colors
+def colorBlended(fract: Float,
+    r: Float, g: Float, b: Float,
+    r2: Float, g2: Float, b2: Float, a: Float) =
+  color(r + (r2 - r) * fract, g + (g2 - g) * fract, b + (b2 - b) * fract, a)
+ 
+ 
+// Draw arc line
+def arcLine(x: Float, y: Float,deg: Float, rad_i: Float, w: Float) {
+  val a=(min (deg/SINCOS_PRECISION,SINCOS_LENGTH-1)).toInt
+  val numlines=(w/2).toInt
+ 
+  var rad = rad_i
+  for (j <- 0 until numlines) {
+    beginShape()
+    for (i <- 0 until a) { 
+      vertex(cosLUT(i)*rad+x,sinLUT(i)*rad+y)
+    }
+    endShape()
+    rad += 2
+  }
+}
+ 
+// Draw arc line with bars
+def arcLineBars(x: Float, y: Float, deg: Float, rad: Float, w: Float) {
+  val a = ((min (deg/SINCOS_PRECISION,SINCOS_LENGTH-1))).toInt / 4
+ 
+  beginShape(QUADS)
+  for (i <- 0 until a by 4) {
+    vertex(cosLUT(i)*(rad)+x,sinLUT(i)*(rad)+y)
+    vertex(cosLUT(i)*(rad+w)+x,sinLUT(i)*(rad+w)+y)
+    vertex(cosLUT(i+2)*(rad+w)+x,sinLUT(i+2)*(rad+w)+y)
+    vertex(cosLUT(i+2)*(rad)+x,sinLUT(i+2)*(rad)+y)
+  }
+  endShape()
+}
+ 
+// Draw solid arc
+def arc(x: Float, y: Float, deg: Float, rad: Float, w: Float) {
+  val a = min(deg/SINCOS_PRECISION,SINCOS_LENGTH-1).toInt
+  beginShape(QUAD_STRIP)
+  for (i <- 0 until a) {
+    vertex(cosLUT(i)*(rad)+x,sinLUT(i)*(rad)+y)
+    vertex(cosLUT(i)*(rad+w)+x,sinLUT(i)*(rad+w)+y)
+  }
+  endShape()
+}

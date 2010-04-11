@@ -11,6 +11,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val lsystems = project("L-Systems", "L_Systems", new DefaultSpdeProject(_))
   lazy val matrix = project("Matrix", "Matrix", new DefaultOpenGLProject(_))
   lazy val ti_81 = project("TI-81", "TI-81", new DefaultSpdeProject(_))
+  lazy val geometry = project("Geometry", "Geometry", new DefaultOpenGLProject(_))
 
   /* Video projects use GSVideo, see VIDEO.md for more info. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
