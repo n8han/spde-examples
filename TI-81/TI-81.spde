@@ -1,12 +1,18 @@
 size(500, 500)
 
+def squared = points(-50, 50) { x => x * x }
+
+def slope = points(-250, 250) {
+  x => ((mouseY * 2.0 / height) * x)
+}
+
+def sliding_sine = points(0, 10) { 
+  x => sin( x * mouseX * 5 / width ) 
+} map { 
+  case (x, y) => (x, y * mouseY * 250 / height)
+}
+
 def draw {
   background(128)
-  lineplot(
-    points(0, 10) { 
-      x => sin( x * mouseX * 5 / width ) 
-    } map { 
-      case (x, y) => (x, height/2 - (y * mouseY * 250 / height).toInt)
-    }
-  )
+  lineplot(sliding_sine)
 }
