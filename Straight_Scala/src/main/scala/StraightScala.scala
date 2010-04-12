@@ -6,7 +6,7 @@ object StraightScalaRunner {
   def main(args: Array[String]) { PApplet.main(Array("StraightScala")) }
 }
 class StraightScala extends PApplet {
-  val items = { 0 to 500 }.view.map { (_, random(255).toInt) }
+  lazy val items = { 0 to width }.view.map { (_, random(255).toInt) }
   
   override def setup {
     size(500, 200)
