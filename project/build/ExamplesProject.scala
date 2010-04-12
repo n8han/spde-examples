@@ -16,6 +16,9 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new DefaultSpdeProject(_))
   lazy val lsystems = project("L-Systems", "L_Systems", new DefaultSpdeProject(_))
   lazy val matrix = project("Matrix", "Matrix", new DefaultOpenGLProject(_))
+  lazy val planerotate = project("PlaneRotate", "PlaneRotate", new DefaultSpdeProject(_))
+  lazy val ti_81 = project("TI-81", "TI-81", new DefaultSpdeProject(_))
+  lazy val geometry = project("Geometry", "Geometry", new DefaultOpenGLProject(_))
 
   /* Video projects use GSVideo, see VIDEO.md for more info. */
   lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
@@ -27,6 +30,10 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   })
   lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightScala"
+  })
+  lazy val android = project("Android", "Android", new AndroidProject(_) with SpdeAndroidProject {
+    def androidPlatformName="android-2.0"
+    override def sketchClass = "Fold"
   })
   lazy val straight_java = project("Straight_Java", "Straight_Java", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightJava"
