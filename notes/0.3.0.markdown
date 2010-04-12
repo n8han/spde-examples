@@ -1,0 +1,8 @@
+Depends on spde-sbt 0.4.0, Processing 1.1.
+
+#### New Examples
+
+* TI-81: basic function graphing using the new `FunctionPlotting` methods in Spde 0.3.0
+* PlaneRotate: translated from Processing, uses the P3D renderer
+* Geometry: translated from Processing, uses OpenGL rendering
+* Android: Fold sketch repackaged for Android export
