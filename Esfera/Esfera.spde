@@ -1,0 +1,73 @@
+/**
+ * Esfera
+ * by David Pena.  
+ * 
+ * Distribucion aleatoria uniforme sobre la superficie de una esfera. 
+ */
+
+val cuantos = 8000
+val z = new Array[Float](cuantos)
+val phi = new Array[Float](cuantos)
+val largos = new Array[Float](cuantos)
+var rx = 0f
+var ry = 0f
+
+override def setup() {
+  size(1024, 768, OPENGL)
+  noiseDetail(3)
+}
+
+lazy val radio = height / 3.5f
+lazy val lista = List.tabulate(cuantos) { n => new pelo() }
+
+def draw() {
+  background(0)
+  translate(width/2,height/2)
+
+  val rxp = ((mouseX-(width/2))*0.005f)
+  val ryp = ((mouseY-(height/2))*0.005f)
+  rx = (rx*0.9)+(rxp*0.1f)
+  ry = (ry*0.9)+(ryp*0.1f)
+  rotateY(rx)
+  rotateX(ry)
+  fill(0)
+  noStroke()
+  sphere(radio)
+
+  lista foreach { _.dibujar() }
+}
+
+class pelo {
+  val z = random(-radio,radio)
+  val phi = random(TWO_PI)
+  val largo = random(1.15f,1.2f)
+  val theta = asin(z/radio)
+
+  def dibujar() {
+    val x = radio * cos(theta) * cos(phi)
+    val y = radio * cos(theta) * sin(phi)
+    val z = radio * sin(theta)
+    val off = (noise(millis() * 0.0005f,sin(phi))-0.5f) * 0.3f
+    val offb = (noise(millis() * 0.0007f,sin(z) * 0.01f)-0.5f) * 0.3f
+
+    val thetaff = theta+off
+    val phff = phi+offb
+    val msx= screenX(x,y,z)
+    val msy= screenY(x,y,z)
+
+    val xo = radio * cos(thetaff) * cos(phff)
+    val yo = radio * cos(thetaff) * sin(phff)
+    val zo = radio * sin(thetaff)
+
+    val xb = xo * largo
+    val yb = yo * largo
+    val zb = zo * largo
+    
+    beginShape(LINES)
+    stroke(0)
+    vertex(x,y,z)
+    stroke(200,150)
+    vertex(xb,yb,zb)
+    endShape()
+  }
+}
