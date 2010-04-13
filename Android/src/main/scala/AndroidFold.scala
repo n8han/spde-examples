@@ -21,6 +21,6 @@ class Fold extends PApplet {
     	case (Nil, (x1, h1)) => (x1, h1) :: Nil
       case ((x2, h2) :: t, (x1, h1)) =>
         (x1, (h1 + h2) /2) :: (x2, h2) :: t
-    }
+    } reverse
   }
 }
