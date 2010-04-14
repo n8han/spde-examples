@@ -13,6 +13,6 @@ def sliding_sine = points(0, 10) {
 }
 
 def draw {
-  background(128)
+  background(200)
   lineplot(sliding_sine)
 }
