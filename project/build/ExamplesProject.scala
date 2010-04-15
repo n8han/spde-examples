@@ -25,7 +25,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
 
 
   lazy val trending = project("Trending", "Trending", new DefaultSpdeProject(_) {
-    val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.2"
+    val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.3"
   })
   lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightScala"
