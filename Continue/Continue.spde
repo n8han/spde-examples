@@ -1,0 +1,23 @@
+import scala.util.continuations._
+
+size(500, 200)
+frameRate(15)
+
+var cur: Unit => Unit = { (u: Unit) =>
+  reset {
+    var x = 0
+    while(true) {
+      x = (x + 1) % width
+      background(255)
+      color(0)
+      line(width - x, 0, x, height)
+      shift { k: (Unit => Unit) =>
+        cur = k
+      }
+    }
+  }
+}
+
+def draw() {
+  cur()
+}

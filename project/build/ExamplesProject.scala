@@ -6,6 +6,10 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val explode = project("Explode", "Explode", new DefaultSpdeProject(_))
   lazy val flocking = project("Flocking", "Flocking", new DefaultSpdeProject(_))
   lazy val fold = project("Fold", "Fold", new DefaultSpdeProject(_))
+  lazy val continue = project("Continue", "Continue", new DefaultSpdeProject(_) with AutoCompilerPlugins {
+    val continuations = compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.8.0.RC1")
+    override def compileOptions = CompileOption("-P:continuations:enable") :: super.compileOptions.toList
+  })
   lazy val list = project("List", "List", new DefaultSpdeProject(_))
   lazy val gasket = project("Sierpinski", "Sierpinski_Gasket", new DefaultSpdeProject(_))
   lazy val lsystems = project("L-Systems", "L_Systems", new DefaultSpdeProject(_))
