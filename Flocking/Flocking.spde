@@ -152,7 +152,7 @@ class Boid(
 case class Vector(x: Float, y: Float) {
   def this() = this(0.0, 0.0)
 
-  def magnitude = Math.sqrt(x*x + y*y)
+  def magnitude = sqrt(x*x + y*y)
 
   def + (v: Vector) = Vector(x+v.x, y+v.y)
 
@@ -175,11 +175,11 @@ case class Vector(x: Float, y: Float) {
     else this
   }
 
-  def heading = -1 * Math.atan2(-y, x)
+  def heading = -1 * atan2(-y, x)
 
   def distance (v: Vector) = {
     val dx = x - v.x;
     val dy = y - v.y;
-    Math.sqrt(dx*dx + dy*dy)
+    sqrt(dx*dx + dy*dy)
   }
 }
