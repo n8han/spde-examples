@@ -2,7 +2,7 @@ import sbt._
 
 class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
   val databinder_repo = "Databinder Repository" at "http://databinder.net/repo"
-  val spde_sbt = "us.technically.spde" % "spde-sbt-plugin" % "0.4.1"
+  val spde_sbt = "us.technically.spde" % "spde-sbt-plugin" % "0.4.2"
 
   val t_repo = "t_repo" at "http://tristanhunt.com:8081/content/groups/public/"
   val snuggletex_repo = "snuggletex_repo" at "http://www2.ph.ed.ac.uk/maven2"
