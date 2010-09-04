@@ -1,0 +1,291 @@
+/**
+ * FractalParticles
+ * by Nicolas Garcia Belmonte (philogb) http://blog.thejit.org/  
+ */
+
+import scala.collection.mutable.HashMap;
+import scala.math._;
+
+class Point(xc: Float = 0f, yc: Float = 0f, zc: Float = 0f) {
+	var x = xc;
+	var y = yc;
+	var z = zc;
+
+	override def clone = new Point(x, y, z);
+}
+
+class Ball {
+	var pos = new Point;
+	var begin = new Point;
+	var end = new Point;
+	var shapes = new HashMap[String, Point];
+}
+
+object Shape {
+	def mengerSponge(objs: List[Ball], itr: Int = 3, s: Float = 200f): List[Ball]  = {
+		var varobjs = objs;
+		var ans: List[Ball] = List();
+		var n = 0;
+		def gen(itr: Int, s: Float, x: Float, y: Float, z: Float): Unit = {
+			if(itr > 0) {
+				val ns = s / 3;
+				for { i <- List.range(-1, 2)
+					  j <- List.range(-1, 2)
+					  k <- List.range(-1, 2) }
+					if(!(i == 0 && j == 0
+						|| i == 0 && k == 0
+						|| j == 0 && k == 0))
+						gen(itr -1, ns, x + i * ns, y + j * ns, z + k * ns);
+				
+			} else {
+				n += 1;
+				var obj: Ball = null;
+				if(varobjs isEmpty) {
+					obj = new Ball;
+				} else {
+					obj = varobjs head;
+					varobjs = varobjs tail;
+				}
+				obj pos = new Point(x, y, z);
+				obj.shapes += "mengersponge" -> new Point(x, y, z);
+				ans = obj :: ans;
+			}
+			();
+		}
+		gen(itr, s, 0f, 0f, 0f);
+		val point = ans.head.shapes("mengersponge");
+		while(!varobjs.isEmpty) {
+			var obj = varobjs head;
+			varobjs = varobjs tail;
+			obj pos = point clone;
+			obj.shapes += "mengersponge" -> (point clone);
+			ans = obj :: ans;
+		}
+		ans;
+	}
+	
+	def sierpinski(objs: List[Ball], itr: Int = 3, s: Float = 200f): List[Ball] = {
+		var varobjs = objs;
+		var ans: List[Ball] = List();
+		var n = 0;
+		def gen(itr: Int, s: Float, x: Float, y: Float, z: Float): Unit = {
+			if(itr > 0) {
+				val ns = s / 2;
+				gen(itr -1, ns, x + ns, y + ns, z + ns);
+				gen(itr -1, ns, x + ns, y - ns, z - ns);
+				gen(itr -1, ns, x - ns, y - ns, z + ns);
+				gen(itr -1, ns, x - ns, y + ns, z - ns);
+				
+			} else {
+				n += 1;
+				var obj: Ball = null
+				if(varobjs isEmpty) {
+					obj = new Ball;
+				} else {
+					obj = varobjs head;
+					varobjs = varobjs tail;
+				}
+				obj.pos = new Point(x, y, z);
+				obj.shapes += "sierpinski" -> new Point(x, y, z);
+				ans = obj :: ans;
+			}
+			();
+		}
+		gen(itr, s, 0f, 0f, 0f);
+		val point = ans.head.shapes("sierpinski");
+		while(!varobjs.isEmpty) {
+			var obj = varobjs head;
+			varobjs = varobjs tail;
+			obj.pos = point clone;
+			obj.shapes += "sierpinski" -> (point clone);
+			ans = obj :: ans;
+		}
+		ans;
+	}
+	
+	def sphere(objs: List[Ball], s: Float = 200f): List[Ball] = {
+		objs foreach {obj =>
+			val pos = obj pos;
+			val x = pos x;
+			val y = pos y;
+			val z = pos z;
+			val r = x * x + y * y + z * z;
+			val theta = acos(z / sqrt(r));
+			val phi = atan2(y, if (x != 0) x else 1);
+			val p1 = s * sin(theta) * cos(phi);
+			val p2 = s * sin(theta) * sin(phi);
+			val p3 = s * cos(theta);
+			val sphere = new Point(p1, p2, p3);
+			pos x = p1;
+			pos y = p2;
+			pos z = p3;
+			obj.shapes += "sphere" -> sphere;
+		}
+		objs;
+	}
+}
+
+abstract class Transitions extends Function[Float, Float] {
+	private def easeInVar(x: Float, i: Float = 1.0): Float = apply(i * x);
+	private def easeOutVar(x: Float, i: Float = 1.0): Float = i - apply(i * (1 - x));
+
+	def easeIn(x: Float) = easeInVar(x);
+	def easeOut(x: Float) = easeOutVar(x);
+	def easeInOut(x: Float): Float = (if (x <= 0.5) easeInVar(x, 2) else easeOutVar(x, 2)) /2
+}
+
+object Transitions {
+	private val pi = Pi;
+	
+	def linear(x: Float) = x;
+	object Expo extends Transitions {
+		override def apply(x: Float): Float = pow(2, 8 * (x - 1))
+	}
+	object Circ extends Transitions {
+		override def apply(x: Float): Float = 1 - sin(acos(x))
+	}
+	object Sine extends Transitions {
+		override def apply(x: Float): Float = 1 - sin((1 - x) * pi / 2)
+	}
+	object Back extends Transitions {
+		override def apply(p: Float): Float = {
+			val x = 1.618;
+			pow(p, 2) * ((x + 1) * p - x);
+		}
+	}
+	object Bounce extends Transitions {
+		override def apply(p: Float): Float = {
+			var a = 0f;
+			var b = 1.0f;
+			while(p < (7 - 4 * a) / 11) {
+				a += b;
+				b /= 2;
+			}
+			b * b - pow((11 - 6 * a - 11 * p) / 4, 2)
+		}
+	}
+	object Elastic extends Transitions {
+		override def apply(p: Float): Float = pow(2, 10 * (p -1)) * cos(20 * (p - 1) * pi / 3)
+	}
+	object Quad extends Transitions {
+		override def apply(p: Float): Float = pow(p, 2)
+	}
+	object Cubic extends Transitions {
+		override def apply(p: Float): Float = pow(p, 3)
+	}
+	object Quart extends Transitions {
+		override def apply(p: Float): Float = pow(p, 4)
+	}
+	object Quint extends Transitions {
+		override def apply(p: Float): Float = pow(p, 5)
+	}
+}
+
+object tween {
+	var transition: (Float => Float) = null;
+	var compute: (Float => Unit) = _;
+	var complete: (() => Unit) = _;
+	var loop = 0f;
+	var loops = 0f;
+	var loopsDelay = 0f;
+	
+	def step() = {
+		if(loop <= loopsDelay) {
+			loop += 1;
+		} else {
+			if(loop <= loops + loopsDelay) {
+				var delta = transition((loop - loopsDelay) / loops);
+				compute(delta);
+				loop += 1;
+			} else {
+				complete();
+				loop;
+			}
+		}
+	}
+}
+
+//rotation
+var rx = 0f;
+var ry = 0f;
+//color
+var r = 180f;
+var g = 10f;
+var b = 10f;
+//shape
+var shape = 0;
+var parts: List[Ball] = List();
+val shapes = List("MengerSponge", "Sphere", "MengerSponge", "Sierpinski")
+var s = 300;
+var first = true;
+//create ball list
+parts = Shape.mengerSponge(parts, 2, s);
+parts = Shape.sphere(parts, s / 1.1f);
+parts = Shape.sierpinski(parts, 5, s / 2f);
+//set tween options
+tween loops = 130;
+tween loopsDelay = 0;
+tween.transition = Transitions.Elastic.easeOut _;
+tween compute = { delta =>
+	for(part <- parts) {
+		val pos = part pos;
+		val begin = part begin;
+		val end = part end;
+		pos x = begin.x + (end.x - begin.x) * delta;
+		pos y = begin.y + (end.y - begin.y) * delta;
+		pos z = begin.z + (end.z - begin.z) * delta;
+	}
+}
+tween complete = nextShape;
+//next shape
+def nextShape() = {
+	for(p <- parts) {
+		p begin = p.pos.clone;
+		p.end = p.shapes.get(shapes(shape).toLowerCase()) match {
+			case Some(x) => x
+			case None => new Point()
+		}
+	}
+	shape = (shape + 1) % (shapes length);
+	tween loop = 0;
+	tween loopsDelay = if(first) 0 else 60;
+	first = false;
+	();
+}
+
+nextShape();
+
+override def setup() {
+  size(1024, 768, OPENGL)
+}
+
+def draw() {
+  tween step;
+  rx += 0.03f;
+  ry += 0.01f;
+
+  r = 180 + 40 * sin(ry);
+  g = 10 + 100 * (1 - sin(rx));
+  b = 10 + 100 * (1 - cos(ry));
+	
+  background(0);
+  pushMatrix();
+  translate(width/2, height/2);
+  rotateX(rx);
+  rotateY(ry);
+  parts foreach { part =>
+  	  val pos = part pos;
+	  if(abs(pos.x) > 0.01f 
+	  || abs(pos.y) > 0.01f 
+	  || abs(pos.z) > 0.01f) {
+		  pushMatrix();
+		  translate(pos x, pos y, pos z);
+		  val z = modelZ(pos.x, pos.y, pos.z);
+		  val delta = min(1f, max(0.4, (z  + s/2) / s));
+		  fill(r, g, b, delta * 255);
+		  box(15 * delta);
+		  popMatrix();
+	  }
+  }
+  popMatrix();
+}
