@@ -1,0 +1,92 @@
+/**
+ * Spore1 
+ * by idFlood. 
+ * 
+ * A short program for alife experiments.
+ *
+ * Translated to Scala from the original P5 example "Spore1" by Mike Davis.
+ */
+
+val maxcells = 6700
+// set lower for smoother animation, higher for faster simulation
+val runs_per_loop = 10000
+
+var cells : List[Point] = List()
+
+val spore_color = color(172, 255, 128)
+val black = color(0, 0, 0)
+
+size(640, 200)
+frameRate(24)
+background(0)
+seed
+
+def draw() {
+  // Run cells in random order
+  for( i <- 0 to runs_per_loop ) cells( random(maxcells - 1).toInt ) run()
+}
+
+def seed() {
+  background(0)
+  // Add cells at random places
+  cells = (0 to maxcells) map { n => getRandomPoint } toList
+}
+
+def getRandomPoint() : Point = {
+  var cx = random(width).toInt
+  var cy = random(height).toInt
+  if( get( cx, cy ) == black )
+    return new Point( cx, cy )
+  getRandomPoint
+}
+
+class Point (var x: Int, var y: Int){
+  set( x, y, spore_color )
+  
+  // Perform action based on surroundings
+  def run(){
+    // Fix cell coordinates
+    while(x < 0 ){ x += width }
+    while(x > width - 1 ){ x -= width }
+    while(y < 0 ){ y += height }
+    while(y > height - 1 ){ y -= height }
+    
+    // Cell instructions
+    if( getpix( x + 1, y ) == black )
+      move(0, 1)
+    else if ( getpix( x, y - 1) != black && getpix(x, y + 1) != black )
+      move(random(9).toInt - 4, random(9).toInt - 4)
+  }
+  
+  // Will move the cell (dx, dy) units if that space is empty
+  def move( dx: Int, dy: Int ) {
+    if( getpix( x + dx, y + dy ) == black ){
+      setPix( x + dx, y + dy, getpix(x, y))
+      setPix( x, y, color(0) )
+      x += dx
+      y += dy
+    }
+  }
+}
+
+def setPix( dx: Int, dy: Int, c: Int ) {
+  var mx = dx
+  var my = dy
+  while(mx < 0 ){ mx += width }
+  while(mx > width - 1 ){ mx -= width }
+  while(my < 0 ){ my += height }
+  while(my > height - 1 ){ my -= height }
+  set( mx, my, c )
+}
+
+def getpix( dx: Int, dy: Int ) = {
+  var mx = dx
+  var my = dy
+  while(mx < 0 ){ mx += width }
+  while(mx > width - 1 ){ mx -= width }
+  while(my < 0 ){ my += height }
+  while(my > height - 1 ){ my -= height }
+  get( mx, my )
+}
+
+override def mousePressed() { seed }
