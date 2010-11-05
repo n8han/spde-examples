@@ -11,8 +11,7 @@ val maxcells = 6700
 // set lower for smoother animation, higher for faster simulation
 val runs_per_loop = 10000
 
-var cells : List[Point] = List()
-
+var cells : Array[Point] = Array()
 val spore_color = color(172, 255, 128)
 val black = color(0, 0, 0)
 
@@ -23,13 +22,17 @@ seed
 
 def draw() {
   // Run cells in random order
-  for( i <- 0 to runs_per_loop ) cells( random(maxcells - 1).toInt ) run()
+  var ii = 0
+  while(ii < runs_per_loop ){
+    cells( random(maxcells - 1).toInt ) run()
+    ii += 1
+  }
 }
 
 def seed() {
   background(0)
   // Add cells at random places
-  cells = (0 to maxcells) map { n => getRandomPoint } toList
+  cells = (0 to maxcells) map { n => getRandomPoint } toArray
 }
 
 def getRandomPoint() : Point = {
