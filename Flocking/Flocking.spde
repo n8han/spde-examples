@@ -11,7 +11,7 @@
  * Scala translation by Nathan Hamblen.
  */
 
-size(600, 400)
+size(1024, 600)
 colorMode(RGB,255,255,255,100)
 val flock = new Flock
 smooth()

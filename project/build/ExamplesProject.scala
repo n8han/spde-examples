@@ -20,11 +20,6 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val esfera = project("Esfera", "Esfera", new DefaultOpenGLProject(_))
   lazy val fractalParticles = project("FractalParticles", "FractalParticles", new DefaultOpenGLProject(_))
   
-  /* Video projects use GSVideo, see VIDEO.md for more info. */
-  lazy val loop = project("Loop", "Loop", new SampleVideoProject(_))
-  lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
-
-
   lazy val trending = project("Trending", "Trending", new DefaultSpdeProject(_) {
     val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.4"
   })
