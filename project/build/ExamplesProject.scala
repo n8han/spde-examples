@@ -26,10 +26,6 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightScala"
   })
-  lazy val android = project("Android", "Android", new AndroidProject(_) with SpdeAndroidProject {
-    def androidPlatformName="android-2.0"
-    override def sketchClass = "Fold"
-  })
   lazy val straight_java = project("Straight_Java", "Straight_Java", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightJava"
     // set the path below to your rt.jar / classes.jar, if you want applet export to work.
