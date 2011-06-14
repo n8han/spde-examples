@@ -7,7 +7,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val flocking = project("Flocking", "Flocking", new DefaultSpdeProject(_))
   lazy val fold = project("Fold", "Fold", new DefaultSpdeProject(_))
   lazy val continue = project("Continue", "Continue", new DefaultSpdeProject(_) with AutoCompilerPlugins {
-    val continuations = compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.8.0.RC7")
+    val continuations = compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.0-1")
     override def compileOptions = CompileOption("-P:continuations:enable") :: super.compileOptions.toList
   })
   lazy val list = project("List", "List", new DefaultSpdeProject(_))
@@ -26,7 +26,7 @@ class ExamplesProject(info: ProjectInfo) extends ParentProject(info) with poster
   lazy val scratchP = project("Scratch", "Scratch", new SampleVideoProject(_))
   
   lazy val trending = project("Trending", "Trending", new DefaultSpdeProject(_) {
-    val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.4"
+    val dispatch = "net.databinder" %% "dispatch-lift-json" % "0.7.8"
   })
   lazy val straight_scala = project("Straight_Scala", "Straight_Scala", new DefaultSpdeProject(_) {
     override def sketchClass = "StraightScala"
